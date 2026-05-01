@@ -117,11 +117,14 @@ def words_to_tokens(line_words):
 
 
 def is_column_header_line(tokens):
+    """PROJECT-SPECIFIC: returns True for a line that contains the table's
+    column-header text (so the parser can skip it instead of treating it as a
+    data row). Edit the required-words tuple below to match your PDF.
+    """
     if not tokens:
         return False
     text = ' '.join(t[1] for t in tokens)
-    # Adjust this list of required words to match your PDF's column header.
-    return all(w in text for w in ('Column Name', 'Data Type'))
+    return all(w in text for w in ('Column Name', 'Data Type'))  # <-- EDIT
 
 
 def md_escape(s):

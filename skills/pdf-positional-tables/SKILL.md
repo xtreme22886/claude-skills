@@ -13,7 +13,7 @@ Use this skill when **all** of the following are true:
 2. The tables are rendered as positioned text — words placed at fixed x/y coordinates — rather than as PDF table objects with cell borders. Telltale signs: the source application is Microsoft Access, an ORM schema dumper, or an internal report generator.
 3. The "tables" can span multiple pages with continuation rows that have no column header repeated.
 
-If the PDF has real table objects (lines/borders separating cells), don't use this skill — use `pdfplumber`'s `page.extract_tables()` from the standard pdf skill, which is dramatically simpler.
+If the PDF has real table objects (lines/borders separating cells), don't use this skill — use `pdfplumber`'s `page.extract_tables()` via [Anthropic's official `pdf` skill](https://github.com/anthropics/skills/tree/main/skills/pdf), which is dramatically simpler.
 
 ## Why pdftotext is the wrong tool
 
@@ -28,25 +28,35 @@ The right tool is `pdfplumber`. It exposes each word's physical x-coordinate fro
 If pdfplumber is not available:
 
 ```bash
-# Try apt first (rare); usually need pipx
-apt-get install -y pipx 2>/dev/null
+# Try the system package manager first; usually need pipx
+apt-get install -y pipx 2>/dev/null || python3 -m pip install --user pipx
 pipx install pdfplumber
-# Resulting interpreter:
-PDFPLUMBER_PY=/root/.local/share/pipx/venvs/pdfplumber/bin/python
+
+# pipx installs into the invoking user's home directory. Resolve the
+# interpreter portably (works for any user, any platform):
+PDFPLUMBER_PY="$(pipx environment --value PIPX_LOCAL_VENVS)/pdfplumber/bin/python"
 ```
 
 Verify: `$PDFPLUMBER_PY -c "import pdfplumber; print(pdfplumber.__version__)"`.
+
+If `pipx` itself isn't available and can't be installed, fall back to a venv:
+
+```bash
+python3 -m venv /tmp/pdfplumber-venv
+/tmp/pdfplumber-venv/bin/pip install pdfplumber
+PDFPLUMBER_PY=/tmp/pdfplumber-venv/bin/python
+```
 
 ### 2. Probe the PDF — confirm columns are stable
 
 Before assuming the skill applies, sample several pages spread across the document and inspect the column-header line's word x-coordinates. Use `scripts/probe_columns.py`:
 
 ```bash
-# From this skill's own directory — adjust if invoking from elsewhere.
-$PDFPLUMBER_PY scripts/probe_columns.py "input.pdf"
+# Run from this skill's own directory; replace <path-to-pdf> with the actual file.
+$PDFPLUMBER_PY scripts/probe_columns.py "<path-to-pdf>"
 ```
 
-(The skill's directory is `~/.claude/skills/pdf-positional-tables/` for user-scope installs, or `<plugin-dir>/skills/pdf-positional-tables/` if installed via a plugin.)
+(The skill's directory is `~/.claude/skills/pdf-positional-tables/` for user-scope installs, or `<plugin-dir>/skills/pdf-positional-tables/` if installed via a plugin. Substitute `<path-to-pdf>` with the actual PDF the user provided — the script just takes a filesystem path.)
 
 This prints the x-coordinate of each column-header word on ~10 sampled pages. If those x-coordinates match across all sampled pages (typically to within < 0.5 pt), proceed. If they vary significantly, this skill does not apply — fall back to the standard pdf skill or content-based heuristics.
 
@@ -60,21 +70,26 @@ Read the PDF's first content page and a couple of continuation pages to identify
 
 ### 4. Adapt the reference parser
 
-`scripts/parse_positional_tables.py` is a working template. The only project-specific knobs are at the top of the file:
+`scripts/parse_positional_tables.py` is a working template. **It will not run correctly out of the box** — you must edit it for the specific PDF before running.
 
-```python
-COL_X0 = {           # column name → x-coordinate of its left edge
-    'Column Name':     44.13,
-    'Data Type':      213.19,
-    ...
-}
-HEADER_Y_MAX = 50    # words with top <= this are page header
-FOOTER_Y_MIN = 565   # words with top >= this are page footer
-TABLE_RE = re.compile(r'^Table:\s+(.+?)\s*$')   # how new tables are introduced
-PAGES = (2, 5564)    # 0-indexed half-open range to process; skip cover pages
+Copy the script to the working directory, then edit:
+
+1. **The constants block at the top of the file** (lines marked `PROJECT-SPECIFIC CONSTANTS`):
+   - `PDF_PATH`, `OUTPUT_PATH` — file paths.
+   - `COL_X0` — paste the column-name → x-coordinate map from `probe_columns.py`. Include every column the PDF has; remove any column the PDF doesn't have. Order matters (left to right).
+   - `HEADER_Y_MAX`, `FOOTER_Y_MIN` — y-coordinate cuts for the page header/footer (from step 3).
+   - `TABLE_RE` — regex matching the line that introduces a new logical table (capture group 1 = table name). Default matches `Table: NAME`; change if the PDF uses something else (e.g. `Entity:`, `## `, etc.).
+   - `PAGES` — `(start, end)` half-open 0-indexed page range. Use this to skip cover/copyright pages.
+
+2. **`is_column_header_line()`** (further down the file) — its required-words list (`'Column Name'`, `'Data Type'`) must match the actual column-header text in the PDF, or the parser will treat the column header as a data row.
+
+Then run with the pdfplumber interpreter:
+
+```bash
+$PDFPLUMBER_PY parse_positional_tables.py
 ```
 
-Copy the script into the working directory, fill in those constants from step 3, and run it. The parser:
+The parser:
 
 - Streams pages and writes each completed table to disk immediately (avoids OOM on large PDFs).
 - Calls `page.flush_cache()` after each page (otherwise pdfplumber accumulates per-page state and OOMs at ~3000 pages).
@@ -92,7 +107,7 @@ If anything is wrong, the column x-coordinates in `COL_X0` likely need adjusting
 
 ## Output formats
 
-The reference script writes markdown with one `## TableName` section per table and a 7-column markdown table per record. To produce CSV/JSON instead, replace `write_table_md()` in the script — the parsed structure is already a list of `{column: value}` dicts.
+The reference script writes markdown with one `## TableName` section per table and a markdown table per record whose columns match `COL_X0` (i.e. however many columns your PDF has). To produce CSV/JSON instead, replace `write_table_md()` in the script — the parsed structure is already a list of `{column: value}` dicts.
 
 ## Performance notes
 
