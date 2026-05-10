@@ -1,0 +1,25 @@
+# Standalone CI job snippet for projects that already have a .gitlab-ci.yml and
+# only want to add the Notion docs-publish step. Append (manually or via
+# /dev-team-adopt) to your existing .gitlab-ci.yml.
+#
+# Requires:
+#   - NOTION_TOKEN as a masked CI/CD variable on the project.
+#   - The bundle's notion_publish.py reachable on the runner — either install
+#     the bundle on the runner, or commit a copy under .ci/scripts/.
+
+stages:
+  - docs   # add 'docs' to your existing stages list if not already there
+
+docs-publish:
+  stage: docs
+  image: python:3.11-slim
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      changes:
+        - docs/ops/**/*
+  before_script:
+    - pip install --quiet notion-client tomli
+  script:
+    - python3 .ci/scripts/notion_publish.py --project "$CI_PROJECT_NAME" --docs-root docs/ops
+  variables:
+    NOTION_TOKEN: $NOTION_TOKEN

@@ -1,0 +1,30 @@
+# Standalone GitHub Actions workflow for projects that want to add only the
+# Notion docs-publish step (not the full bundle CI template). Place at
+# .github/workflows/docs-publish.yml in your project.
+#
+# Requires:
+#   - NOTION_TOKEN secret set on the repo.
+#   - .github/scripts/notion_publish.py copied from
+#     ~/.claude/skills/dev-team/adapter/notion_publish.py
+#     (or symlinked, or fetched fresh — your call).
+
+name: docs-publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/ops/**"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet notion-client tomli
+      - run: python3 .github/scripts/notion_publish.py --project "${{ github.event.repository.name }}" --docs-root docs/ops
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}

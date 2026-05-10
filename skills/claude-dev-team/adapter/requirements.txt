@@ -1,0 +1,5 @@
+# Runtime deps for claude-dev-team adapters.
+# Installed by INSTALL.md step: pip install --user -r adapter/requirements.txt
+notion-client>=2.2.0
+tomli>=2.0.0; python_version < "3.11"
+# Note: tomllib is in stdlib for Python 3.11+

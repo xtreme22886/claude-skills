@@ -1,0 +1,30 @@
+# Base .gitignore for claude-dev-team projects.
+# Stack-specific ignores are appended below.
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local secrets / scratch
+.env
+.env.local
+*.local
+secrets.toml
+*.pem
+*.key
+
+# claude-dev-team per-project state
+.claude/current-work.json
+.claude/paused/
+.claude/events.jsonl
+.claude/flakes.jsonl
+.claude/tracker-cache.json
+
+# Build outputs (generic)
+dist/
+build/
+out/
+coverage/

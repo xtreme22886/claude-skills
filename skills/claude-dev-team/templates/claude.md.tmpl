@@ -1,0 +1,39 @@
+# {{PROJECT_NAME}}
+
+{{PROJECT_DESCRIPTION}}
+
+## Stack
+
+{{STACK}}
+
+## How development works in this project
+
+This project uses the [claude-dev-team](https://gitlab.your-internal-host/your-namespace/claude-dev-team) skill bundle. The conventions:
+
+- **Vertical slices only.** Every issue cuts through the full stack end-to-end. One slice = one focused work session, one user-visible behavior change.
+- **Phase commands** drive the workflow. Start a slice with `/work-start`, finish design with `/work-design-done`, push and review with `/work-review`, close out with `/work-done`.
+- **Docs are per-slice, not batched.** Every slice that changes user-visible behavior updates `docs/user-guide/`. Every slice that introduces a new failure mode updates `docs/troubleshooting/`. Every slice that changes IT-Ops-relevant setup or troubleshooting updates `docs/ops/` (which auto-publishes to Notion on merge to main).
+- **ADRs for non-obvious design choices.** Use `/grill-with-docs` when a decision deserves recording.
+
+## Tracker
+
+- Type: {{TRACKER_TYPE}}
+- Host: {{TRACKER_HOST}}
+- Project: {{TRACKER_PROJECT_PATH}}
+
+## CI
+
+{{CI_DESCRIPTION}}
+
+## Project-specific guidance for Claude
+
+<!-- Add anything here that future-Claude needs to know about this project that isn't obvious from the code: domain quirks, non-standard conventions, gotchas. -->
+
+(none yet)
+
+## Stack-specific commands
+
+- Lint: `{{LINT_CMD}}`
+- Typecheck: `{{TYPECHECK_CMD}}`
+- Test: `{{TEST_CMD}}`
+- Verify-fast (pre-push): `{{VERIFY_FAST_CMD}}`

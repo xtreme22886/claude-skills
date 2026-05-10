@@ -7,6 +7,7 @@ A small collection of [Claude Code](https://claude.com/claude-code) skills I've 
 | Skill | What it does |
 | --- | --- |
 | [`pdf-positional-tables`](skills/pdf-positional-tables/) | Extract tables from PDFs where every table shares the same column headers and the columns are at the same x-coordinates throughout the document (Microsoft Access exports, schema dumps, API references). |
+| [`claude-dev-team`](skills/claude-dev-team/) | A reusable software-development discipline for Claude Code: vertical slices, dual GitHub/GitLab tracker support, per-slice docs (in-repo + Notion mirror for IT Ops), and 19 slash commands tying it together. See `skills/claude-dev-team/DESIGN.md` for the decision record. |
 
 ## Installing a skill
 

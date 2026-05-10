@@ -1,0 +1,55 @@
+name: main
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - {{CI_SETUP_STEP}}
+      - run: {{LINT_CMD}}
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - {{CI_SETUP_STEP}}
+      - run: {{TYPECHECK_CMD}}
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - {{CI_SETUP_STEP}}
+      - run: {{TEST_CMD}}
+
+  docs-publish:
+    needs: [lint, typecheck, test]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Detect docs/ops/ changes
+        id: docs_changed
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q '^docs/ops/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publish to Notion
+        if: steps.docs_changed.outputs.changed == 'true'
+        run: |
+          pip install --quiet notion-client tomli
+          python3 .github/scripts/notion_publish.py --project "{{NOTION_PROJECT_NAME}}" --docs-root docs/ops
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}

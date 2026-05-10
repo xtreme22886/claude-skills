@@ -1,0 +1,34 @@
+{
+  "_comment": "Per-project config for claude-dev-team. Committed to git. Edit to override defaults from ~/.config/claude-dev-team/config.toml or the bundle's defaults.toml.",
+
+  "name": "{{PROJECT_NAME}}",
+  "description": "{{PROJECT_DESCRIPTION}}",
+  "stack": "{{STACK}}",
+  "created_at": "{{CREATED_AT}}",
+
+  "tracker": {
+    "type": "{{TRACKER_TYPE}}",
+    "host": "{{TRACKER_HOST}}",
+    "project_id": "{{TRACKER_PROJECT_ID}}",
+    "project_path": "{{TRACKER_PROJECT_PATH}}"
+  },
+
+  "ci": {
+    "provider": "{{CI_PROVIDER}}",
+    "lint_command": "{{LINT_CMD}}",
+    "typecheck_command": "{{TYPECHECK_CMD}}",
+    "test_command": "{{TEST_CMD}}",
+    "verify_fast_command": "{{VERIFY_FAST_CMD}}"
+  },
+
+  "docs": {
+    "publish_to_notion": {{PUBLISH_TO_NOTION}},
+    "notion_project_name": "{{NOTION_PROJECT_NAME}}"
+  },
+
+  "enforcement": {
+    "mode": "advisory"
+  },
+
+  "minimal": {{IS_MINIMAL}}
+}
