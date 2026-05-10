@@ -10,6 +10,7 @@ within the time budget, which can be too slow for large projects.
 
 from __future__ import annotations
 
+import argparse
 import json
 import shlex
 import signal
@@ -72,6 +73,9 @@ def run_step(name: str, cmd: str, remaining_budget: int) -> tuple[bool, float]:
 
 
 def main():
+    # Parse args first so --help works regardless of project state.
+    argparse.ArgumentParser(description="Run pre-push verify-fast checks.").parse_args()
+
     cfg = load_project_config()
     ci_cfg = cfg.get("ci", {})
     budget = load_budget()
