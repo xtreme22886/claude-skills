@@ -52,7 +52,7 @@ claude-dev-team/
 ## Requirements (will need installing on the work machine)
 
 - Linux (WSL2 or VM); not supported on native Windows
-- `git`, `bash`, `python3` (≥3.10), `pip`
+- `git`, `bash`, `python3` (≥3.10), `python3-venv` (the bundle creates its own private venv at install time — see `INSTALL.md`)
 - `gh` (GitHub CLI) and `glab` (GitLab CLI)
 - A Notion integration token + access to the org-wide "Engineering Docs" database
 - A GitLab PAT (`api`, `read_repository`, `write_repository`)

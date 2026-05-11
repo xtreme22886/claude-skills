@@ -17,21 +17,28 @@ echo
 
 # 1. Remove symlinked SKILL.md
 rm -f "$SKILL_DIR/SKILL.md"
-rmdir --ignore-fail-on-non-empty "$SKILL_DIR" 2>/dev/null || true
 echo "  removed SKILL.md link"
 
-# 2. Remove symlinked slash commands
+# 2. Remove the adapter/ symlink and dt-python wrapper
+rm -f "$SKILL_DIR/adapter"
+rm -f "$SKILL_DIR/dt-python"
+echo "  removed adapter link and dt-python wrapper"
+
+# 3. Try to remove the now-likely-empty skill dir
+rmdir --ignore-fail-on-non-empty "$SKILL_DIR" 2>/dev/null || true
+
+# 4. Remove symlinked slash commands
 for cmd in "$BUNDLE_DIR/commands/"*.md; do
   name="$(basename "$cmd")"
   rm -f "$COMMANDS_DIR/$name"
 done
 echo "  removed slash command links"
 
-# 3. Remove statusline.sh symlink
+# 5. Remove statusline.sh symlink
 rm -f "$CLAUDE_HOME/statusline.sh"
 echo "  removed statusline.sh link"
 
-# 4. Strip dev-team entries from settings.json
+# 6. Strip dev-team entries from settings.json
 if [[ -f "$SETTINGS_FILE" ]]; then
   python3 - "$SETTINGS_FILE" <<'PYEOF'
 import json
@@ -60,11 +67,11 @@ print(f"  cleaned {settings_path}")
 PYEOF
 fi
 
-# 5. Remove marker
+# 7. Remove marker
 rm -f "$MARKER_FILE"
 
 echo
 echo "Uninstall complete."
 echo "  ~/.config/claude-dev-team/ is preserved (your tokens and config)."
 echo "  per-project .claude/ directories are preserved."
-echo "  the bundle directory itself ($BUNDLE_DIR) is preserved."
+echo "  the bundle directory itself ($BUNDLE_DIR) is preserved (including its .venv/)."

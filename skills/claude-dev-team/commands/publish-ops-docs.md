@@ -15,11 +15,11 @@ You're the manual Notion publish command. Normally CI handles this; this is for 
 
 ## Run the publisher
 
-Invoke `python3 ~/.claude/skills/dev-team/adapter/notion_publish.py`:
+Invoke `notion_publish.py` via the bundle's `dt-python` wrapper (which runs the script inside the bundle's venv so `notion-client` resolves):
 
 ```bash
 NOTION_TOKEN=<from user config> \
-python3 ~/.claude/skills/dev-team/adapter/notion_publish.py \
+~/.claude/skills/dev-team/dt-python ~/.claude/skills/dev-team/adapter/notion_publish.py \
   --project "<from .claude/project.json>" \
   --docs-root docs/ops \
   --database-id "<from user config>"

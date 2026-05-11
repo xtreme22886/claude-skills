@@ -15,18 +15,19 @@ if [[ ! -f ".claude/project.json" ]]; then
   exit 0
 fi
 
+DT_PYTHON="${HOME}/.claude/skills/dev-team/dt-python"
 ADAPTER="${HOME}/.claude/skills/dev-team/adapter/verify_fast.py"
 
-if [[ ! -f "$ADAPTER" ]]; then
-  echo "[pre-push] verify_fast.py not found at $ADAPTER. Bundle install incomplete?" >&2
-  echo "[pre-push] Skipping verify-fast and allowing push." >&2
+if [[ ! -x "$DT_PYTHON" || ! -f "$ADAPTER" ]]; then
+  echo "[pre-push] dev-team bundle not fully installed (missing dt-python or verify_fast.py)." >&2
+  echo "[pre-push] Re-run the bundle's install.sh. Skipping verify-fast and allowing push." >&2
   exit 0
 fi
 
 echo "[pre-push] Running verify-fast..."
 START=$(date +%s)
 
-if python3 "$ADAPTER"; then
+if "$DT_PYTHON" "$ADAPTER"; then
   END=$(date +%s)
   echo "[pre-push] verify-fast passed in $((END - START))s"
   exit 0

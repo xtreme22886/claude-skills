@@ -18,7 +18,13 @@ A single Notion page (under the org-wide Engineering Docs database) titled "Dev 
 
 ## Run the dashboard publisher
 
-Invoke `python3 ~/.claude/skills/dev-team/adapter/notion_publish.py --dashboard`:
+Invoke the dashboard publisher via the bundle's `dt-python` wrapper (which runs the script inside the bundle's venv):
+
+```bash
+NOTION_TOKEN=<from user config> \
+~/.claude/skills/dev-team/dt-python ~/.claude/skills/dev-team/adapter/notion_publish.py --dashboard
+```
+
 
 The publisher:
 
